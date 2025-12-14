@@ -44,9 +44,18 @@ jobs:
       shell: cmd
       run: makebem.bat
 
+    - name: List built files
+      shell: bash
+      run: |
+        echo "Files in root:"
+        ls -la *.exe 2>/dev/null || echo "No .exe files in root"
+        echo ""
+        echo "Files in src/:"
+        ls -la src/*.exe 2>/dev/null || echo "No .exe files in src"
+
     - name: Verify binaries exist
       run: |
-        test -f b-em.exe
+        test -f src/b-em.exe
         test -f src/m7makechars.exe
         test -f src/hdfmt.exe
         test -f src/jstest.exe
