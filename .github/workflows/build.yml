@@ -27,17 +27,17 @@ jobs:
           mingw-w64-x86_64-gcc
           make
           unzip
-          wget
 
     - name: Download Allegro 5.2.2.0
-      shell: bash
+      shell: pwsh
       run: |
         # Download the specific version required by README
         # Using the MinGW-w64 build for 64-bit Windows
         cd ..
-        wget https://github.com/liballeg/allegro5/releases/download/5.2.2.0/allegro-x86_64-w64-mingw32-gcc-6.2.0-posix-seh-static-5.2.2.0.zip
-        unzip allegro-x86_64-w64-mingw32-gcc-6.2.0-posix-seh-static-5.2.2.0.zip
-        mv allegro allegro5
+        $url = "https://github.com/liballeg/allegro5/releases/download/5.2.2.0/allegro-x86_64-w64-mingw32-gcc-6.2.0-posix-seh-static-5.2.2.0.zip"
+        Invoke-WebRequest -Uri $url -OutFile "allegro.zip"
+        Expand-Archive -Path "allegro.zip" -DestinationPath "."
+        Rename-Item -Path "allegro" -NewName "allegro5"
         cd b-em
 
     - name: Build with makebem.bat
