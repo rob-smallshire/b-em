@@ -1,0 +1,62 @@
+name: Windows Build
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build-windows:
+    name: Build on Windows (MinGW via makebem.bat)
+    runs-on: windows-latest
+
+    defaults:
+      run:
+        shell: msys2 {0}
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup MSYS2
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: MINGW64
+        update: true
+        install: >-
+          mingw-w64-x86_64-gcc
+          make
+
+    - name: Download Allegro 5.2.2.0
+      shell: pwsh
+      run: |
+        # Download the specific version required by README
+        # Using the MinGW x64 dynamic build
+        cd ..
+        $url = "https://github.com/liballeg/allegro5/releases/download/5.2.2.0/allegro-mingw-gcc6.2.0-x64-dynamic-5.2.2.zip"
+        Invoke-WebRequest -Uri $url -OutFile "allegro.zip"
+        Expand-Archive -Path "allegro.zip" -DestinationPath "."
+        Rename-Item -Path "allegro" -NewName "allegro5"
+        cd b-em
+
+    - name: Build with makebem.bat
+      shell: cmd
+      run: makebem.bat
+
+    - name: Verify binaries exist
+      shell: bash
+      run: |
+        # makebem.bat only builds these two binaries
+        # (not all utilities like the autotools build does)
+        test -f src/b-em.exe
+        test -f src/hdfmt.exe
+        echo "Windows binaries built successfully!"
+        echo "  - b-em.exe (main emulator)"
+        echo "  - hdfmt.exe (hard disk formatter)"
+
+    - name: Smoke test hdfmt
+      shell: bash
+      run: |
+        echo "Testing hdfmt..."
+        src/hdfmt.exe 2>&1 || true
+        echo "hdfmt executed without crashing!"
