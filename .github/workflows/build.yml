@@ -25,7 +25,9 @@ jobs:
           liballegro-image5-dev \
           liballegro-primitives5-dev \
           zlib1g-dev \
-          pkg-config
+          pkg-config \
+          automake \
+          autoconf
 
     - name: Generate build system
       run: ./autogen.sh
@@ -54,7 +56,7 @@ jobs:
     - name: Install dependencies
       run: |
         brew update
-        brew install allegro pkg-config
+        brew install allegro pkg-config automake autoconf
 
     - name: Generate build system
       run: ./autogen.sh
