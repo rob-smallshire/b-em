@@ -64,18 +64,14 @@ jobs:
     - name: Configure
       run: ./configure
 
-    - name: Build
-      run: make
-
-    - name: Check for duplicate library warnings
+    - name: Build and check for warnings
       run: |
-        make clean
-        if make 2>&1 | grep -i "warning.*duplicate"; then
+        if make 2>&1 | tee build.log | grep -i "warning.*duplicate"; then
           echo "ERROR: Found duplicate library warnings!"
+          cat build.log
           exit 1
-        else
-          echo "SUCCESS: No duplicate library warnings found!"
         fi
+        echo "SUCCESS: Build completed with no duplicate library warnings!"
 
     - name: Verify binaries
       run: |
