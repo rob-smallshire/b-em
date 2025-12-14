@@ -1,0 +1,92 @@
+name: Build
+
+on:
+  push:
+    branches: [ master, rjs/* ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build-ubuntu:
+    name: Build on Ubuntu
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          liballegro5-dev \
+          liballegro-acodec5-dev \
+          liballegro-audio5-dev \
+          liballegro-dialog5-dev \
+          liballegro-image5-dev \
+          liballegro-primitives5-dev \
+          zlib1g-dev \
+          pkg-config
+
+    - name: Generate build system
+      run: ./autogen.sh
+
+    - name: Configure
+      run: ./configure
+
+    - name: Build
+      run: make
+
+    - name: Verify binaries
+      run: |
+        test -f src/b-em
+        test -f src/jstest
+        test -f src/gtest
+        test -f src/sdf2imd
+        echo "All binaries built successfully!"
+
+  build-macos:
+    name: Build on macOS
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        brew update
+        brew install allegro pkg-config
+
+    - name: Generate build system
+      run: ./autogen.sh
+
+    - name: Configure
+      run: ./configure
+
+    - name: Build
+      run: make
+
+    - name: Check for duplicate library warnings
+      run: |
+        make clean
+        if make 2>&1 | grep -i "warning.*duplicate"; then
+          echo "ERROR: Found duplicate library warnings!"
+          exit 1
+        else
+          echo "SUCCESS: No duplicate library warnings found!"
+        fi
+
+    - name: Verify binaries
+      run: |
+        test -f src/b-em
+        test -f src/jstest
+        test -f src/gtest
+        test -f src/sdf2imd
+        echo "All binaries built successfully!"
+
+    - name: Basic smoke test
+      run: |
+        # Test that b-em can at least show version/help without crashing
+        # Note: b-em needs GUI so we can't fully run it in CI
+        # Just verify the binary is executable
+        file src/b-em
+        otool -L src/b-em | grep -i allegro
