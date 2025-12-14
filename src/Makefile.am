@@ -15,13 +15,11 @@ amrefresh:
 #   INCLUDE_DEBUGGER - include the cpu_debug implementation
 # USE_MEMORY_POINTER - do not assume Co Pro memory starts at address 0
 
-b_em_CFLAGS = $(allegro_CFLAGS) -DBEM -DINCLUDE_DEBUGGER -DUSE_MEMORY_POINTER -DMODET -DMODE32 -DBEEBEM -DM68K
+b_em_CFLAGS = $(ALLEGRO_CFLAGS) -DBEM -DINCLUDE_DEBUGGER -DUSE_MEMORY_POINTER -DMODET -DMODE32 -DBEEBEM -DM68K
+b_em_LDADD = $(ALLEGRO_LIBS) -lz
 
-# workaround for Win32 Allegro, which has `allegro-config' missing
-if OS_WIN
-b_em_LDADD = -lallegro_audio -lallegro_acodec -lallegro_primitives -lallegro_dialog -lallegro_image -lallegro_font -lallegro -lz -lm
-else
-b_em_LDADD = -lallegro_audio -lallegro_acodec -lallegro_primitives -lallegro_dialog -lallegro_image -lallegro_font -lallegro_main -lallegro -lz -lm -lpthread
+if !OS_WIN
+b_em_LDADD += -lpthread
 endif
 
 b_em_SOURCES = \
@@ -155,17 +153,16 @@ endif
 hdfmt_SOURCES = hdfmt.c
 
 jstest_SOURCES = jstest.c
-
-jstest_LDADD = -lallegro -lallegro_main
+jstest_CFLAGS = $(ALLEGRO_CFLAGS)
+jstest_LDADD = $(ALLEGRO_LIBS)
 
 gtest_SOURCES = sdf-gtest.c sdf-geo.c
-
-gtest_LDADD = -lallegro_main
+gtest_CFLAGS = $(ALLEGRO_CFLAGS)
+gtest_LDADD = $(ALLEGRO_LIBS)
 
 sdf2imd_SOURCES = sdf2imd.c sdf-geo.c
-
-sdf2imd_LDADD = -lallegro_main
+sdf2imd_CFLAGS = $(ALLEGRO_CFLAGS)
+sdf2imd_LDADD = $(ALLEGRO_LIBS)
 
 bsnapdump_SOURCES = bsnapdump.c
-
 bsnapdump_LDADD = -lz

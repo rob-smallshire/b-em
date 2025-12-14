@@ -1,8 +1,6 @@
 # configure.ac for B-em
 
-AC_INIT([B-em],
-	m4_esyscmd_s([utils/b-em-version-str.sh]),
-	[thomas@xteddy.org])
+AC_INIT([B-em],[m4_esyscmd_s(utils/b-em-version-str.sh)],[thomas@xteddy.org])
 
 AC_CONFIG_AUX_DIR(etc)
 AM_INIT_AUTOMAKE([-Wall -Werror foreign subdir-objects])
@@ -21,7 +19,7 @@ ISRELEASED="no"
 
 AC_MSG_CHECKING([whether to enable debugging])
 AC_ARG_ENABLE(debug,
-	      AC_HELP_STRING([--enable-debug], [build debug executable]))
+	      AS_HELP_STRING([--enable-debug],[build debug executable]))
 
 CF_WARNINGS="-Wall -Wno-format-security"
 CFLAGS="$CFLAGS $CF_WARNINGS -std=gnu11 -D_GNU_SOURCE"
@@ -36,20 +34,11 @@ else
 fi
 
 # Checks for libraries.
-AC_CHECK_LIB([allegro], [al_install_system])
-AC_CHECK_LIB([allegro_acodec], [al_init_acodec_addon])
-AC_CHECK_LIB([allegro_audio], [al_install_audio])
-AC_CHECK_LIB([allegro_dialog], [al_init_native_dialog_addon])
-AC_CHECK_LIB([allegro_image], [al_init_image_addon])
-AC_CHECK_LIB([allegro_primitives], [al_init_primitives_addon])
+PKG_CHECK_MODULES([ALLEGRO], [allegro-5 allegro_acodec-5 allegro_audio-5 allegro_dialog-5 allegro_image-5 allegro_primitives-5 allegro_font-5 allegro_main-5])
 AC_CHECK_LIB([m], [sin])
-AC_CHECK_LIB([pthread], [pthread_create])
-AC_CHECK_LIB([z], [gzopen])
 
 # Checks for header files.
 AC_CHECK_HEADERS([inttypes.h limits.h malloc.h stddef.h stdint.h stdlib.h string.h unistd.h])
-AC_CHECK_HEADER([allegro5/allegro.h],[],
-	[AC_MSG_FAILURE([The Allegro version 5 library is needed but not installed], 1)],[])
 
 AM_CONDITIONAL(OS_WIN, test "$host_os" = "win")
 
@@ -91,7 +80,8 @@ AC_CHECK_HEADERS(jack/jack.h alsa/asoundlib.h)
 AC_SEARCH_LIBS(jack_port_register,jack jack2)
 AC_CHECK_LIB(asound,snd_rawmidi_open)
 
-AC_OUTPUT([Makefile src/Makefile])
+AC_CONFIG_FILES([Makefile src/Makefile])
+AC_OUTPUT
 
 echo
 echo "Configured version: $VERSION"
