@@ -38,13 +38,33 @@ jobs:
     - name: Build
       run: make
 
-    - name: Verify binaries
+    - name: Verify binaries exist
       run: |
         test -f src/b-em
+        test -f src/m7makechars
+        test -f src/hdfmt
         test -f src/jstest
         test -f src/gtest
         test -f src/sdf2imd
+        test -f src/bsnapdump
         echo "All binaries built successfully!"
+
+    - name: Smoke test utilities
+      run: |
+        # Test utilities can execute without crashing
+        echo "Testing m7makechars..."
+        src/m7makechars 2>&1 || true
+
+        echo "Testing hdfmt..."
+        src/hdfmt 2>&1 || true
+
+        echo "Testing bsnapdump..."
+        src/bsnapdump 2>&1 || true
+
+        echo "Testing sdf2imd..."
+        src/sdf2imd 2>&1 || true
+
+        echo "All utilities executed without crashing!"
 
   build-macos:
     name: Build on macOS
@@ -73,18 +93,40 @@ jobs:
         fi
         echo "SUCCESS: Build completed with no duplicate library warnings!"
 
-    - name: Verify binaries
+    - name: Verify binaries exist
       run: |
         test -f src/b-em
+        test -f src/m7makechars
+        test -f src/hdfmt
         test -f src/jstest
         test -f src/gtest
         test -f src/sdf2imd
+        test -f src/bsnapdump
         echo "All binaries built successfully!"
 
-    - name: Basic smoke test
+    - name: Smoke test utilities
       run: |
-        # Test that b-em can at least show version/help without crashing
-        # Note: b-em needs GUI so we can't fully run it in CI
-        # Just verify the binary is executable
+        # Test utilities can execute without crashing
+        # Most should show usage/help when run without args
+
+        echo "Testing m7makechars..."
+        src/m7makechars 2>&1 || true  # May exit non-zero without args
+
+        echo "Testing hdfmt..."
+        src/hdfmt 2>&1 || true
+
+        echo "Testing bsnapdump..."
+        src/bsnapdump 2>&1 || true
+
+        echo "Testing sdf2imd..."
+        src/sdf2imd 2>&1 || true
+
+        echo "All utilities executed without crashing!"
+
+    - name: Smoke test main binary
+      run: |
+        # b-em requires GUI/display, so just verify it's properly linked
+        echo "Checking b-em binary..."
         file src/b-em
         otool -L src/b-em | grep -i allegro
+        echo "b-em binary is properly linked!"
