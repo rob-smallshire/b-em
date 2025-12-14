@@ -8,7 +8,7 @@ on:
 
 jobs:
   build-windows:
-    name: Build on Windows (MinGW)
+    name: Build on Windows (MinGW via makebem.bat)
     runs-on: windows-latest
 
     defaults:
@@ -26,24 +26,30 @@ jobs:
         install: >-
           mingw-w64-x86_64-gcc
           mingw-w64-x86_64-allegro
-          mingw-w64-x86_64-pkg-config
           make
-          autoconf
-          automake
-          libtool
 
-    - name: Generate build system
-      run: ./autogen.sh
+    - name: Setup Allegro paths for makebem.bat
+      shell: bash
+      run: |
+        # Create a parallel allegro5 directory structure as expected by makebem.bat
+        # Point it to the MSYS2 MinGW installation
+        mkdir -p ../allegro5/include
+        mkdir -p ../allegro5/lib
+        mkdir -p ../allegro5/bin
 
-    - name: Configure
-      run: ./configure
+        # Link to MSYS2 Allegro installation
+        cp -r /mingw64/include/allegro5 ../allegro5/include/
+        cp /mingw64/lib/liballegro*.a ../allegro5/lib/ || true
+        cp /mingw64/lib/liballegro*.dll.a ../allegro5/lib/ || true
+        cp /mingw64/bin/allegro*.dll ../allegro5/bin/ || true
 
-    - name: Build
-      run: make
+    - name: Build with makebem.bat
+      shell: cmd
+      run: makebem.bat
 
     - name: Verify binaries exist
       run: |
-        test -f src/b-em.exe
+        test -f b-em.exe
         test -f src/m7makechars.exe
         test -f src/hdfmt.exe
         test -f src/jstest.exe
