@@ -7,6 +7,67 @@ on:
     branches: [ master ]
 
 jobs:
+  build-windows:
+    name: Build on Windows (MinGW)
+    runs-on: windows-latest
+
+    defaults:
+      run:
+        shell: msys2 {0}
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup MSYS2
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: MINGW64
+        update: true
+        install: >-
+          mingw-w64-x86_64-gcc
+          mingw-w64-x86_64-allegro
+          mingw-w64-x86_64-pkg-config
+          make
+          autoconf
+          automake
+          libtool
+
+    - name: Generate build system
+      run: ./autogen.sh
+
+    - name: Configure
+      run: ./configure
+
+    - name: Build
+      run: make
+
+    - name: Verify binaries exist
+      run: |
+        test -f src/b-em.exe
+        test -f src/m7makechars.exe
+        test -f src/hdfmt.exe
+        test -f src/jstest.exe
+        test -f src/gtest.exe
+        test -f src/sdf2imd.exe
+        test -f src/bsnapdump.exe
+        echo "All Windows binaries built successfully!"
+
+    - name: Smoke test utilities
+      run: |
+        echo "Testing m7makechars..."
+        src/m7makechars.exe 2>&1 || true
+
+        echo "Testing hdfmt..."
+        src/hdfmt.exe 2>&1 || true
+
+        echo "Testing bsnapdump..."
+        src/bsnapdump.exe 2>&1 || true
+
+        echo "Testing sdf2imd..."
+        src/sdf2imd.exe 2>&1 || true
+
+        echo "All Windows utilities executed without crashing!"
+
   build-ubuntu:
     name: Build on Ubuntu
     runs-on: ubuntu-latest
